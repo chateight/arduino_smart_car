@@ -26,6 +26,7 @@
 #include "arduino_secrets.h" 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
 
+
 int status = WL_IDLE_STATUS;
 WiFiServer server(80);
 
