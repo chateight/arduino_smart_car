@@ -1,6 +1,6 @@
-# arduino wi-fi communication check program
-# only available for spec-n, does not work with spec-ac
-# working as a web server connected to the local access point
+# arduino smart car project was updated
+# 
+# the car uses ultorasonic sensor and avoids some obstacles.
 #
-# using web browser, you can access the arduino web service and confirm the wi-fi functionality through the web page.
+# using web browser, you can control the motor car
 #
