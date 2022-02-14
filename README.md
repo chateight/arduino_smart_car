@@ -1,6 +1,7 @@
 # arduino smart car project was updated
 # 
-# the car uses ultorasonic sensor and avoids some obstacles.
+# the car uses a ultorasonic sensor and it make possible to avoid obstacles.
 #
-# using web browser, you can control the motor car
+# you can control the motor car using a web browser
 #
+# c code is reference only
