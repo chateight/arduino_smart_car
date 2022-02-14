@@ -6,7 +6,7 @@ int main(void) {
     p_num = &num;
         
     printf("int型変数numのアドレス:%p\n", &num);
-    printf("int型ポインタ変数p_numの値:%p\n", p_num);             // same as above(&numm)
+    printf("int型ポインタ変数p_numの値:%p\n", p_num);             // same as above(&num)
     printf("int型変数numのアドレス先の値:%d\n", *(&num));          // "*" as a operator
     printf("int型ポインタ変数p_numの参照先アドレスの値:%d\n", *p_num);      // same as above
  
