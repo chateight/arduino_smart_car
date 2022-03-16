@@ -4,4 +4,4 @@
 #
 # you can control the motor car using a web browser
 #
-# 
+# "wifi_ap.ino" is for access point mode and "wifi_server.ino" is for client mode operation
