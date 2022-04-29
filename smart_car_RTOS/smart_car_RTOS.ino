@@ -13,7 +13,7 @@
 // Type Defines and Constants
 //**************************************************************************
 
-#define  ERROR_LED_PIN  13 //Led Pin: Typical Arduino Board
+#define ERROR_LED_PIN  13 //Led Pin: Typical Arduino Board
 
 #define ERROR_LED_LIGHTUP_STATE  HIGH // the state that makes the led light up on your board, either low or high
 
@@ -61,32 +61,35 @@ void threadA( void *pvParameters )
   int32_t SendValue = 0;
   BaseType_t xStatus;
   while(1){
-    SendValue=web_server();
-    if (SendValue<9){
-      if (SendValue==1 && run_state_a==false){      // whether to activate or stay at current state?
-      xTaskCreate(threadC,     "Task C",       256, NULL, tskIDLE_PRIORITY + 4, &Handle_cTask); 
-      run_state_a= true;    // set to run state
-      SendValue==1;
-      xStatus = xQueueSend(xQueue, &SendValue, 0);
+    SendValue=web_server_ap();    // ap mode
+    //SendValue=web_server();     // wi-fi mode
+    if (SendValue<9)
+    {
+      if (SendValue==1 && run_state_a==false)
+      {      // whether to activate or stay at current state?
+        xTaskCreate(threadC,     "Task C",       256, NULL, tskIDLE_PRIORITY + 4, &Handle_cTask); 
+        run_state_a= true;    // set to run state
+        xStatus = xQueueSend(xQueue, &SendValue, 0);
       }     
-      else if (SendValue==0 && run_state_a==true){  // whether to halt or stay at
+      else if (SendValue==0 && run_state_a==true)
+      {  // whether to halt or stay at
         run_state_a= false;    // set to halt state
         SendValue=0;
-      xStatus = xQueueSend(xQueue, &SendValue, 0);
+        xStatus = xQueueSend(xQueue, &SendValue, 0);
       }
       if(xStatus != pdPASS) // send error check
-       {
-         while(1)
-           {
-             Serial.println("rtos queue send error, stopped");
-             delay(300);
-           }
-       }
+      {
+        while(1)
+        {
+        Serial.println("rtos queue send error, stopped");
+        delay(300);
+        }
+      }
   // delete ourselves.
   // Have to call this or the system crashes when you reach the end bracket and then get scheduled.
   //vTaskDelete( Handle_bTask );
     }
-    myDelayMs(500);
+    myDelayMs(300);
   }
   SERIAL.println("Thread A: Deleting");
   vTaskDelete( NULL );
@@ -112,17 +115,17 @@ void threadB( void *pvParameters )
              if (ReceivedValue==1){           // run?
               run_state_b= true;
               distance=s_sensor();
-              if (distance>20){
+              if (distance>30){
               dc_motor(0);
-              }
+                }
               else{
                 dc_motor(1);
+                }
               }
-             }
              else{
               run_state_b= false;
               dc_motor(2);
-             }
+              }
          }
       else{
         if (run_state_b==true){
@@ -137,7 +140,7 @@ void threadB( void *pvParameters )
       }
 //
     SERIAL.flush();
-    myDelayMs(100);
+    myDelayMs(50);
   }
 }
 void threadC( void *pvParameters ) 
@@ -156,7 +159,7 @@ static char ptrTaskList[400]; //temporary string buffer for task stats
 
 void taskMonitor(void *pvParameters)
 {
-    int x;
+    //int x;
     int measurement;
     
     SERIAL.println("Task Monitor: Started");
@@ -186,32 +189,32 @@ void taskMonitor(void *pvParameters)
     	SERIAL.println(ptrTaskList); //prints out already formatted stats
     	SERIAL.flush();
 
-		SERIAL.println("****************************************************");
-		SERIAL.println("Task            State   Prio    Stack   Num     Core" );
-		SERIAL.println("****************************************************");
+		  SERIAL.println("****************************************************");
+		  SERIAL.println("Task            State   Prio    Stack   Num     Core" );
+		  SERIAL.println("****************************************************");
 
-		vTaskList(ptrTaskList); //save stats to char array
-		SERIAL.println(ptrTaskList); //prints out already formatted stats
-		SERIAL.flush();
+		  vTaskList(ptrTaskList); //save stats to char array
+		  SERIAL.println(ptrTaskList); //prints out already formatted stats
+		  SERIAL.flush();
 
-		SERIAL.println("****************************************************");
-		SERIAL.println("[Stacks Free Bytes Remaining] ");
+		  SERIAL.println("****************************************************");
+		  SERIAL.println("[Stacks Free Bytes Remaining] ");
 
-		measurement = uxTaskGetStackHighWaterMark( Handle_aTask );
-		SERIAL.print("Thread A: ");
-		SERIAL.println(measurement);
+		  measurement = uxTaskGetStackHighWaterMark( Handle_aTask );
+		  SERIAL.print("Thread A: ");
+		  SERIAL.println(measurement);
 
-		measurement = uxTaskGetStackHighWaterMark( Handle_bTask );
-		SERIAL.print("Thread B: ");
-		SERIAL.println(measurement);
+		  measurement = uxTaskGetStackHighWaterMark( Handle_bTask );
+		  SERIAL.print("Thread B: ");
+		  SERIAL.println(measurement);
 
-		measurement = uxTaskGetStackHighWaterMark( Handle_monitorTask );
-		SERIAL.print("Monitor Stack: ");
-		SERIAL.println(measurement);
+		  measurement = uxTaskGetStackHighWaterMark( Handle_monitorTask );
+		  SERIAL.print("Monitor Stack: ");
+		  SERIAL.println(measurement);
 
-		SERIAL.println("****************************************************");
-		SERIAL.flush();
-    myDelayMs(10000); // print every 10 seconds
+		  SERIAL.println("****************************************************");
+		  SERIAL.flush();
+      myDelayMs(10000); // print every 10 seconds
     }
 
     // delete ourselves.
@@ -232,7 +235,8 @@ void setup()
   // sensor initialize
   init_sensor();
   // Wi-Fi initialize
-  init_wifi();
+  init_wifi_ap();   // wi-fi ap mode
+  //init_wifi();    // wi-fi mode
   // s_motor initialize
   init_s_motor();
   //dc_motor initialize

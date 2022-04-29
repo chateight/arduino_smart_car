@@ -4,7 +4,7 @@ char ssid_ap[] = "a_car_ap";        // your network SSID (name)
 char pass_ap[] = "coderdojo";    // your network password (use for WPA, or use as key for WEP)
 //int keyIndex = 0;                // your network key Index number (needed only for WEP)
 
-int led =  LED_BUILTIN;
+//int led =  LED_BUILTIN;
 int status = WL_IDLE_STATUS;
 WiFiServer server(80);
 
@@ -28,13 +28,13 @@ void printWiFiStatus() {
 void init_wifi_ap() {
   //Initialize serial and wait for port to open:
   Serial.begin(9600);
-  while (!Serial) {
+  //while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
-  }
+  //}
 
   Serial.println("Access Point Web Server");
 
-  pinMode(led, OUTPUT);      // set the LED pin mode
+//  pinMode(led, OUTPUT);      // set the LED pin mode
 
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -67,7 +67,7 @@ void init_wifi_ap() {
   server.begin();
 
   // you're connected now, so print out the status
-  printWiFiStatus();
+  // printWiFiStatus();
 }
 
 //
