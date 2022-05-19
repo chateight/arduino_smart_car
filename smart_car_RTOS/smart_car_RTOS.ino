@@ -27,6 +27,7 @@
 TaskHandle_t Handle_aTask;    // web server task
 TaskHandle_t Handle_bTask;    // drive task
 TaskHandle_t Handle_cTask;    // s_motor gimmick task
+TaskHandle_t Handle_dTask;    // back buzzer task
 TaskHandle_t Handle_monitorTask;  // monitor task
  
 //**************************************************************************
@@ -57,24 +58,24 @@ void myDelayMsUntil(TickType_t *previousWakeTime, int ms)
 QueueHandle_t xQueue = xQueueCreate( 10, sizeof( unsigned long ) );
 void threadA( void *pvParameters ) 
 {
-  boolean run_state_a= false;     // car state false:halt, true:active
+  boolean run_state_a = false;     // car state false:halt, true:active
   int32_t SendValue = 0;
   BaseType_t xStatus;
   while(1){
-    SendValue=web_server_ap();    // ap mode
-    //SendValue=web_server();     // wi-fi mode
+    SendValue = web_server_ap();    // ap mode
+    //SendValue = web_server();     // wi-fi mode
     if (SendValue<9)
     {
-      if (SendValue==1 && run_state_a==false)
+      if (SendValue == 1 && run_state_a == false)
       {      // whether to activate or stay at current state?
         xTaskCreate(threadC,     "Task C",       256, NULL, tskIDLE_PRIORITY + 4, &Handle_cTask); 
-        run_state_a= true;    // set to run state
+        run_state_a = true;    // set to run state
         xStatus = xQueueSend(xQueue, &SendValue, 0);
       }     
-      else if (SendValue==0 && run_state_a==true)
+      else if (SendValue == 0 && run_state_a == true)
       {  // whether to halt or stay at
-        run_state_a= false;    // set to halt state
-        SendValue=0;
+        run_state_a = false;    // set to halt state
+        SendValue = 0;
         xStatus = xQueueSend(xQueue, &SendValue, 0);
       }
       if(xStatus != pdPASS) // send error check
@@ -105,36 +106,44 @@ void threadB( void *pvParameters )
   int32_t ReceivedValue = 0;
   const TickType_t xTicksToWait = 500U;
   unsigned int distance;
-  boolean run_state_b=false;
+  boolean run_state_b = false;
 
   while(1){
       xStatus = xQueueReceive(xQueue, &ReceivedValue, xTicksToWait);
 
-      if(xStatus == pdPASS) // receive error check
-         {
-             if (ReceivedValue==1){           // run?
-              run_state_b= true;
-              distance=s_sensor();
-              if (distance>30){
-              dc_motor(0);
-                }
-              else{
-                dc_motor(1);
-                }
-              }
-             else{
-              run_state_b= false;
-              dc_motor(2);
-              }
-         }
-      else{
-        if (run_state_b==true){
-          distance=s_sensor();
-          if (distance>30){
-              dc_motor(0);
+      if(xStatus == pdPASS)     // receive error check
+      {
+        if (ReceivedValue == 1)       // run?
+        {           
+          run_state_b = true;
+          distance = s_sensor();
+          if (distance > 30)
+          {
+            dc_motor(0);              // set forward
           }
-          else{
-          dc_motor(1);
+          else
+          {
+            dc_motor(1);              // set backward
+          }
+        }
+        else
+        {
+          run_state_b = false;        // set to stop
+          dc_motor(2);
+        }
+      }
+      else
+      {
+        if (run_state_b == true)
+        {
+          distance = s_sensor();
+          if (distance > 30)
+          {
+            dc_motor(0);
+          }
+          else
+          {
+            dc_motor(1);
           }
         }
       }
@@ -143,9 +152,16 @@ void threadB( void *pvParameters )
     myDelayMs(50);
   }
 }
+
 void threadC( void *pvParameters ) 
 {
   s_motor();
+  vTaskDelete( NULL );
+}
+
+void threadD( void *pvParameters ) 
+{
+  back_sound();
   vTaskDelete( NULL );
 }
 
@@ -241,6 +257,8 @@ void setup()
   init_s_motor();
   //dc_motor initialize
   init_dc_motor();
+  // start sound
+  buzzer_setup();
   SERIAL.println("");
   SERIAL.println("        Program start         ");
   SERIAL.println("******************************");
@@ -267,6 +285,7 @@ void setup()
   xTaskCreate(threadA,     "Task A",       256, NULL, tskIDLE_PRIORITY + 3, &Handle_aTask);
   xTaskCreate(threadB,     "Task B",       256, NULL, tskIDLE_PRIORITY + 2, &Handle_bTask);
   xTaskCreate(taskMonitor, "Task Monitor", 256, NULL, tskIDLE_PRIORITY + 1, &Handle_monitorTask);
+  xTaskCreate(threadC,     "Task C",       256, NULL, tskIDLE_PRIORITY + 4, &Handle_cTask); 
 
   // Start the RTOS, this function will never return and will schedule the tasks.
   vTaskStartScheduler();

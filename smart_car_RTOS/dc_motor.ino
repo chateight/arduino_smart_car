@@ -4,8 +4,8 @@
  const int IN2 = 2;
  const int IN3 = 3;
  const int IN4 = 4;
- const int ENA = 0;  // PWM制御で使うENAピンをD9に(モーター1のPWM制御ピン)
- const int ENB = 5;  // PWM制御で使うENBピンをD10に(モーター2のPWM制御ピン)
+ const int ENA = 0;  // PWM制御で使うENAピン(モーター1のPWM制御ピン)
+ const int ENB = 5;  // PWM制御で使うENBピン(モーター2のPWM制御ピン)
  
  //int i = 0;
  //int step = 5;
@@ -22,7 +22,7 @@ void init_dc_motor(){
 
 void dc_motor(int g){
    long randNumber;
-// g=0 : forward, 1 : backword, others : stop
+// g=0 : forward, 1 : backword, 2 : stop
 switch (g){
   case 0:
 //  if (g==0){
@@ -30,8 +30,8 @@ switch (g){
    digitalWrite(IN2, LOW);  // 2つのモーターを正回転
    digitalWrite(IN3, HIGH);
    digitalWrite(IN4, LOW);
-   analogWrite(ENA, 170);
-   analogWrite(ENB, 170);
+   analogWrite(ENA, 150);
+   analogWrite(ENB, 200);
    break;
 //
   case 1:
@@ -48,6 +48,7 @@ switch (g){
     analogWrite(ENA, 255);
     analogWrite(ENB, 160);
    }
+   xTaskCreate(threadD,     "Task D",       256, NULL, tskIDLE_PRIORITY + 0, &Handle_dTask);
    myDelayMs(500);
    digitalWrite(IN1, LOW);  // stopping the motors
    digitalWrite(IN2, LOW);  // 

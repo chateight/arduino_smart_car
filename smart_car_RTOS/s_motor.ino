@@ -10,22 +10,25 @@ Stepper myStepper(MOTOR_STEPS, 8, 10, 9, 13);
  
 void init_s_motor() { 
   myStepper.setSpeed(10); // 10回転/1分に設定 rpm（1分あたりの回転数）
+  digitalWrite(8,  LOW); 
+  digitalWrite(9,  LOW); 
+  digitalWrite(10, LOW); 
+  digitalWrite(13, LOW); 
   }
   
 void s_motor() { 
   myStepper.step(-128);    // 512ステップで90度回転
   myDelayMs(300);
-  myStepper.step(128);    
-  myDelayMs(300);
-  myStepper.step(128);    
-  myDelayMs(300);
-  myStepper.step(-129);    
+  myStepper.step(256);    
+  //myDelayMs(300);
+  //myStepper.step(128);    
+  //myDelayMs(300);
+  //myStepper.step(-128);    
   
   // 静止時には電流を遮断する。 
   digitalWrite(8,  LOW); 
   digitalWrite(9,  LOW); 
   digitalWrite(10, LOW); 
   digitalWrite(13, LOW); 
-  //  
-  vTaskDelete( NULL );
+  //
 }
